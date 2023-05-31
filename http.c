@@ -62,7 +62,6 @@ void serve_file(SSL *ssl, char *uri)
 void head_file(SSL *ssl, char *uri)
 {
 	PDEBUG("%s: file='%s'\n", __func__, uri);
-
 }
 
 void http_handle(SSL *ssl)
