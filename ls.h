@@ -16,4 +16,4 @@ int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...);
 /* get file type of $filename and store in $filetype */
 void getfiletype(const char *filename, char *filetype, size_t size);
 
-#endif	/* ifndef LS_H */
+#endif	/* LS_H */
