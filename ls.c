@@ -71,7 +71,7 @@ char *mkhtml(const char *dir)
 			"<th>Size</th>\n"
 			"</tr>");
 	errno = 0;
-	char *currdir = getcwd(NULL, 0);
+	char *currdir = getcwd(NULL, 0); /* replace with sfs_argopts.dir */
 	while ((dentry = readdir(dirp)) != NULL) {
 		if (strcmp(dentry->d_name, ".")) {
 			char *fname = dentry->d_name;
