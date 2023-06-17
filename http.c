@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <sys/stat.h>
+#include <sys/sysmacros.h>
 
 #include "common.h"
 #include "ssl.h"
+#include "ls.h"
 
 #define LINE_MAXLEN	4096
 #define	METHOD_MAXLEN	128
@@ -42,6 +46,38 @@ void http_read_req(SSL *ssl, char *method, size_t method_size,
 	PDEBUG("%s: finished reading request headers\n", __func__);
 }
 
+/*
+ * get_filename - Get filename relative to sfs_argopts.dir from the URI after
+ * 		  resolving any symlinks.
+ * 		  Return -1 if invalid filename after perror.
+ */
+static int get_filename(char *filename, const char *uri)
+{
+	return 0;
+}
+
+static int get_file_fd(const char *filename)
+{
+
+}
+
+static void send_file(SSL *ssl, const char *filename)
+{
+
+}
+
+static int is_dir(const char *filename)
+{
+	struct stat sb;
+
+	if (lstat(filename, &sb) == -1) {
+		perror("[*] lstat");
+		return -1;
+	}
+
+	return (sb.st_mode & S_IFMT) == S_IFDIR;
+}
+
 /**
  * serve_file - Serve file given in @uri in response to a GET request
  *
@@ -50,7 +86,23 @@ void http_read_req(SSL *ssl, char *method, size_t method_size,
  */
 void serve_file(SSL *ssl, char *uri)
 {
+	char filename[PATH_MAX];
+	int ret;
+
 	PDEBUG("%s: file='%s'\n", __func__, uri);
+
+	if (get_filename(filename, uri) == -1)
+		return;
+
+	if (ret = is_dir(filename)) {
+		if (ret == -1)
+			return;
+		char *html = mkhtml(filename);
+		/* send directory contents */
+		free(html);
+	} else {
+		/* send file */
+	}
 }
 
 /**
