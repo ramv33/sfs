@@ -72,6 +72,7 @@ char *mkhtml(const char *dir)
 			"</tr>");
 	errno = 0;
 	while ((dentry = readdir(dirp)) != NULL) {
+		/* do not show hidden files */
 		if (strcmp(dentry->d_name, ".")) {
 			char *fname = dentry->d_name;
 			if (stat(fname, &sb) < 0) {
