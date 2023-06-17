@@ -48,7 +48,7 @@ int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 	return *bufsize;
 }
 
-char *mkhtml(const char *uri, const char *dir)
+char *mkhtml(const char *dir)
 {
 	struct dirent *dentry;
 	size_t bufsize = BUFFSIZE;
@@ -79,7 +79,6 @@ char *mkhtml(const char *uri, const char *dir)
 				perror("stat");
 				continue;
 			}
-			int isdir = sb.st_mode & S_IFDIR;
 			char fsize[64] = "";
 			if (!S_ISDIR(sb.st_mode))
 				sprintf(fsize, "%ld", sb.st_size);
