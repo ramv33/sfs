@@ -71,7 +71,6 @@ char *mkhtml(const char *dir)
 			"<th>Size</th>\n"
 			"</tr>");
 	errno = 0;
-	char *currdir = getcwd(NULL, 0); /* replace with sfs_argopts.dir */
 	while ((dentry = readdir(dirp)) != NULL) {
 		if (strcmp(dentry->d_name, ".")) {
 			char *fname = dentry->d_name;
@@ -87,16 +86,14 @@ char *mkhtml(const char *dir)
 				"<td><a href=file://%s/%s>%s</a></td>\n"
 				"<td>%s</td>\n"
 				"</tr>\n",
-				currdir, fname, fname, fsize);
+				dir, fname, fname, fsize);
 			if (ret == -1) {
 				fprintf(stderr, "realloc failed: out of memory\n");
-				free(currdir);
 				free(html);
 				return NULL;
 			}
 		}
 	}
-	free(currdir);
 	appendstr(html, &bufsize, BUFFSIZEINC, "</body>\n</html>");
 	return html;
 }
