@@ -18,11 +18,12 @@
 
 #define errmsg(msg)	perror("[*] " msg);
 
-static struct {
-	int no_recurse;
-	int show_hidden;
-	int port;
-} argopts;
+struct {
+	int		no_recurse;
+	int		show_hidden;
+	int		port;
+	const char 	*dir;
+} sfs_argopts;
 
 static void parse_args(int *argc, char **argv);
 int create_socket(int port);
@@ -43,7 +44,7 @@ int main(int argc, char **argv)
 		dir = getcwd(NULL, 0);	// NOTE: has to be freed
 	puts(dir);
 
-	sockfd = create_socket(argopts.port);
+	sockfd = create_socket(sfs_argopts.port);
 	if (sockfd == -1)
 		exit(EXIT_FAILURE);
 	/* create SSL context */
@@ -108,23 +109,23 @@ static void parse_args(int *argc, char **argv)
 	};
 
 	/* defaults */
-	argopts.port = DEFAULT_PORT;
+	sfs_argopts.port = DEFAULT_PORT;
 
 	while (1) {
 		if ((c = getopt_long(*argc, argv, "p:aR", long_options, NULL)) == -1)
 			break;
 		switch (c) {
 			case 'p':
-				argopts.port = strtol(optarg, NULL, 10);
-				PDEBUG("port=%d\n", argopts.port);
+				sfs_argopts.port = strtol(optarg, NULL, 10);
+				PDEBUG("port=%d\n", sfs_argopts.port);
 				break;
 			case 'a':
 				PDEBUG("show_hidden\n");
-				argopts.show_hidden = 1;
+				sfs_argopts.show_hidden = 1;
 				break;
 			case 'R':
 				PDEBUG("no_recurse\n");
-				argopts.no_recurse = 1;
+				sfs_argopts.no_recurse = 1;
 		}
 	}
 	/* If a directory name is passed, serve files from that directory.
