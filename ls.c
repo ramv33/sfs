@@ -25,7 +25,7 @@
 int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 {
 	va_list ap;
-	int ret;
+	size_t ret;
 	int len;
 
 	va_start(ap, fmt);
