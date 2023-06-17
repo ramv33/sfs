@@ -18,12 +18,7 @@
 
 #define errmsg(msg)	perror("[*] " msg);
 
-struct {
-	int		no_recurse;
-	int		show_hidden;
-	int		port;
-	const char 	*dir;
-} sfs_argopts;
+struct argopts sfs_argopts;
 
 static void parse_args(int *argc, char **argv);
 int create_socket(int port);

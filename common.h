@@ -8,4 +8,13 @@
 #	define PDEBUG(fmt, args...)	/* not debugging; do nothing */
 #endif
 
+struct argopts {
+	int		no_recurse;
+	int		show_hidden;
+	int		port;
+	const char 	*dir;
+};
+
+extern struct argopts sfs_argopts;
+
 #endif /* ifndef COMMON_H */
