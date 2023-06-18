@@ -55,9 +55,16 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
  * get_filename - Get filename relative to sfs_argopts.dir from the URI after
  * 		  resolving any symlinks.
  * 		  Return -1 if invalid filename after perror.
+ * @filename: The filename is stored here.
+ * @size: Size of @filename. Should be PATH_MAX.
+ * @uri: URI given in HTTP request.
  */
-static int get_filename(char *filename, const char *uri)
+static int get_filename(char *filename, size_t size, const char *uri)
 {
+	/* need to check their usage again */
+	strncpy(filename, sfs_argopts.dir, size);
+	strncat(filename, uri, size-1);
+
 	return 0;
 }
 
