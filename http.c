@@ -14,6 +14,17 @@
 #define	URI_MAXLEN	4096
 #define	VERSION_MAXLEN	128
 
+/* HTTP response codes */
+const char *http_ok = "HTTP/1.0 200 OK\r\n";
+const char *http_forbidden = "HTTP/1.0 403 Forbidden\r\n";
+const char *http_notfound = "HTTP/1.0 404 Not Found\r\n";
+
+const char *http_server = "Server: sfs\r\n";
+const char *http_content_type = "Content-type: ";
+const char *http_content_len = "Content-length: ";
+const char *http_keep_alive = "Connection: keep-alive\r\n";
+const char *http_close = "Connection: close\r\n";
+
 int http_read_req(SSL *ssl, char *method, size_t method_size,
 		   char *uri, size_t uri_size)
 {
@@ -88,6 +99,23 @@ static int is_dir(const char *filename)
 	}
 
 	return (sb.st_mode & S_IFMT) == S_IFDIR;
+}
+
+static void send_response_headers(SSL *ssl, const char *type, const size_t len)
+{
+	char content_len[32];
+
+	sprintf(content_len, "%d", len);
+	
+	SSL_write(ssl, http_ok, strlen(http_ok));
+	SSL_write(ssl, http_server, strlen(http_server));
+	SSL_write(ssl, http_keep_alive, strlen(http_keep_alive));
+	SSL_write(ssl, http_content_type, strlen(http_content_type));
+	SSL_write(ssl, type, strlen(type));
+	SSL_write(ssl, "\r\n", 2);
+	SSL_write(ssl, http_content_len, strlen(http_content_len));
+	SSL_write(ssl, content_len, strlen(content_len));
+	SSL_write(ssl, "\r\n\r\n", 4);
 }
 
 /**
