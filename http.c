@@ -89,11 +89,10 @@ void serve_file(SSL *ssl, char *uri)
 	char filename[PATH_MAX];
 	int ret;
 
-	PDEBUG("%s: file='%s'\n", __func__, uri);
-
-	if (get_filename(filename, uri) == -1)
+	rm_trailing_slash(uri);
+	if (get_filename(filename, sizeof(filename), uri) == -1)
 		return;
-
+	PDEBUG("%s: file='%s'\n", __func__, filename);
 	if (ret = is_dir(filename)) {
 		if (ret == -1)
 			return;

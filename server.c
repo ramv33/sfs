@@ -39,6 +39,9 @@ int main(int argc, char **argv)
 		dir = getcwd(NULL, 0);	// NOTE: has to be freed
 	puts(dir);
 
+	rm_trailing_slash(dir);
+	sfs_argopts.dir = dir;
+
 	sockfd = create_socket(sfs_argopts.port);
 	if (sockfd == -1)
 		exit(EXIT_FAILURE);
