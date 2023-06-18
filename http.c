@@ -74,9 +74,20 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
  */
 static int get_filename(char *filename, size_t size, const char *uri)
 {
+	char *r = NULL;
+
 	/* need to check their usage again */
 	strncpy(filename, sfs_argopts.dir, size);
 	strncat(filename, uri, size-1);
+
+	PDEBUG("%s: filename='%s'\n", __func__, filename);
+	r = realpath(filename, NULL);
+	if (!r) {
+		perror("Failed to find URI");
+		return -1;
+	}
+	strncpy(filename, r, size);
+	free(r);
 
 	return 0;
 }
