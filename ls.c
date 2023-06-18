@@ -84,10 +84,10 @@ char *mkhtml(const char *dir)
 				sprintf(fsize, "%ld", sb.st_size);
 			int ret = appendstr(html, &bufsize, BUFFSIZEINC,
 				"<tr>\n"
-				"<td><a href=file://%s/%s>%s</a></td>\n"
+				"<td><a href=/%s>%s</a></td>\n"
 				"<td>%s</td>\n"
 				"</tr>\n",
-				dir, fname, fname, fsize);
+				fname, fname, fsize);
 			if (ret == -1) {
 				fprintf(stderr, "realloc failed: out of memory\n");
 				free(html);
