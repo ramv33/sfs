@@ -150,6 +150,8 @@ void serve_file(SSL *ssl, char *uri)
 		if (ret == -1)
 			return;
 		char *html = mkhtml(filename);
+		send_response_headers(ssl, "text/html", strlen(html));
+		SSL_write(ssl, html, strlen(html));
 		/* send directory contents */
 		free(html);
 	} else {
