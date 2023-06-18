@@ -14,7 +14,7 @@
 #define	URI_MAXLEN	4096
 #define	VERSION_MAXLEN	128
 
-void http_read_req(SSL *ssl, char *method, size_t method_size,
+int http_read_req(SSL *ssl, char *method, size_t method_size,
 		   char *uri, size_t uri_size)
 {
 	char buf[LINE_MAXLEN];
@@ -22,11 +22,13 @@ void http_read_req(SSL *ssl, char *method, size_t method_size,
 
 	PDEBUG("%s: Waiting to read\n", __func__);
 	if (ssl_readline(ssl, buf, LINE_MAXLEN, &err) == 0) {
-		if (err)
+		if (err) {
 			fprintf(stderr, "error reading request headers\n");
+			return -1;
+		}
 		/* nothing to read */
 		PDEBUG("%s: nothing to read\n", __func__);
-		return;
+		return 0;
 	}
 	PDEBUG("%s: read request line\n", __func__);
 	puts(buf);
@@ -38,12 +40,15 @@ void http_read_req(SSL *ssl, char *method, size_t method_size,
 	while (strcmp(buf, "\r\n")) {
 		printf("%s", buf);
 		if (ssl_readline(ssl, buf, sizeof(buf), &err) == 0) {
-			if (err)
+			if (err) {
 				fprintf(stderr, "error reading request headers\n");
-			return;
+				return -1;
+			}
+			return 0;
 		}
 	}
 	PDEBUG("%s: finished reading request headers\n", __func__);
+	return 1;
 }
 
 /*
@@ -122,8 +127,7 @@ void http_handle(SSL *ssl)
 	char method[METHOD_MAXLEN], uri[URI_MAXLEN];
 	char filename[LINE_MAXLEN];
 
-	while (1) {
-		http_read_req(ssl, method, sizeof(method), uri, sizeof(uri));
+	while (http_read_req(ssl, method, sizeof(method), uri, sizeof(uri)) >= 0) {
 		printf("method='%s', uri='%s'\n", method, uri);
 		if (strncasecmp(method, "GET", 4) && strncasecmp(method, "HEAD", 5)) {
 			printf("Method not implemented\n");
