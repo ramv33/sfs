@@ -26,7 +26,7 @@ const char *http_keep_alive = "Connection: keep-alive\r\n";
 const char *http_close = "Connection: close\r\n";
 
 int http_read_req(SSL *ssl, char *method, size_t method_size,
-		   char *uri, size_t uri_size)
+		   char *uri, size_t uri_size, int *close)
 {
 	char buf[LINE_MAXLEN];
 	int err = 0;
@@ -47,6 +47,8 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 	PDEBUG("%s: reading request headers\n", __func__);
 	printf("\n\nRequest Headers\n"
 		"===============\n");
+	/* TODO: check for Connection: close header and set *close=1 */
+	*close = 0;
 	/* check for empty line that terminates the request headers */
 	while (strcmp(buf, "\r\n")) {
 		printf("%s", buf);
@@ -161,8 +163,10 @@ void http_handle(SSL *ssl)
 	char buf[LINE_MAXLEN];
 	char method[METHOD_MAXLEN], uri[URI_MAXLEN];
 	char filename[LINE_MAXLEN];
+	int close = 0;
 
-	while (http_read_req(ssl, method, sizeof(method), uri, sizeof(uri)) >= 0) {
+	while (http_read_req(ssl, method, sizeof(method), uri, sizeof(uri),
+			     &close) >= 0) {
 		printf("method='%s', uri='%s'\n", method, uri);
 		if (strncasecmp(method, "GET", 4) && strncasecmp(method, "HEAD", 5)) {
 			printf("Method not implemented\n");
@@ -173,5 +177,8 @@ void http_handle(SSL *ssl)
 			serve_file(ssl, uri);
 		else
 			head_file(ssl, uri);
+
+		if (close)
+			break;
 	}
 }
