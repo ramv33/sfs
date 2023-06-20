@@ -44,14 +44,13 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 	PDEBUG("%s: read request line\n", __func__);
 	puts(buf);
 	sscanf(buf, "%s %s", method, uri);
-	PDEBUG("%s: reading request headers\n", __func__);
-	printf("\n\nRequest Headers\n"
+	PDEBUG("\n\nRequest Headers\n"
 		"===============\n");
 	/* TODO: check for Connection: close header and set *close=1 */
 	*close = 0;
 	/* check for empty line that terminates the request headers */
 	while (strcmp(buf, "\r\n")) {
-		printf("%s", buf);
+		PDEBUG("%s", buf);
 		if (ssl_readline(ssl, buf, sizeof(buf), &err) == 0) {
 			if (err) {
 				fprintf(stderr, "error reading request headers\n");
