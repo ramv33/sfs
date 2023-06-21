@@ -231,7 +231,7 @@ void serve_file(SSL *ssl, char *uri)
 		/* send directory contents */
 		free(html);
 	} else {
-		/* send file */
+		send_file(ssl, filename);
 	}
 }
 
