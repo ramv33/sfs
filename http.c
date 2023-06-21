@@ -58,6 +58,16 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 			}
 			return 0;
 		}
+		// if (!*close && !cmp_header_key(buf, "Connection")) {
+		// 	if (!cmp_header_val(buf, "close"))
+		// 		*close = 1;
+		// }
+#define CONN_CLOSE_HDR "Connection: close"
+		if (!*close && !strncasecmp(buf, CONN_CLOSE_HDR,
+					    strlen(CONN_CLOSE_HDR))) {
+			PDEBUG("close\n");
+			*close = 1;
+		}
 	}
 	PDEBUG("%s: finished reading request headers\n", __func__);
 	return 1;
