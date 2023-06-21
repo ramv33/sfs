@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
 
@@ -129,8 +131,46 @@ static int get_file_fd(const char *filename)
 
 }
 
+static void send_file_stats(SSL *ssl, int fd, const char *filename)
+{
+	char filetype[64], content_len[32];
+	struct stat sb;
+
+	if (fstat(fd, &sb) == -1) {
+		send_404(ssl, filename);
+		return;
+	}
+	get_filetype(filename, filetype, sizeof(filetype));
+	sprintf(content_len, "%d", sb.st_size);
+
+	SSL_write(ssl, http_ok, strlen(http_ok));
+	SSL_write(ssl, http_server, strlen(http_server));
+	SSL_write(ssl, http_keep_alive, strlen(http_keep_alive));
+	SSL_write(ssl, http_content_type, strlen(http_content_type));
+	SSL_write(ssl, filetype, strlen(filetype));
+	SSL_write(ssl, "\r\n", 2);
+	SSL_write(ssl, http_content_len, strlen(http_content_len));
+	SSL_write(ssl, content_len, strlen(content_len));
+	SSL_write(ssl, "\r\n\r\n", 4);
+
+}
+
 static void send_file(SSL *ssl, const char *filename)
 {
+	char buf[4096];
+	ssize_t nread;
+	int fd;
+
+	fd = open(filename, O_RDONLY);
+	if (fd == -1) {
+		send_404(ssl, filename);
+		return;
+	}
+
+	send_file_stats(ssl, fd, filename);
+	/* TODO: error checking */
+	while ((nread = read(fd, buf, sizeof(buf))) > 0)
+		SSL_write(ssl, buf, nread);
 
 }
 
