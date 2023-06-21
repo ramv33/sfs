@@ -99,7 +99,7 @@ char *mkhtml(const char *dir)
 	return html;
 }
 
-void getfiletype(const char *filename, char *filetype, size_t size)
+void get_filetype(const char *filename, char *filetype, size_t size)
 {
 	if (strcasestr(filename, ".html"))
 		strncpy(filetype, "text/html", size);
