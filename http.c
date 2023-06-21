@@ -73,6 +73,29 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 	return 1;
 }
 
+void send_404(SSL *ssl, const char *filename)
+{
+	const char *response = "<html>\n"
+				"<body>\n"
+				"<p> 404 Not found </p>\n"
+				"</body>\n"
+				"</html>\n";
+	const char *type = "text/html\r\n";
+	char content_len[32];
+
+	sprintf(content_len, "%d", strlen(response));
+
+	PDEBUG("%s\n", __func__);
+	SSL_write(ssl, http_notfound, strlen(http_notfound));
+	SSL_write(ssl, http_close, strlen(http_close));
+	SSL_write(ssl, http_content_type, strlen(http_content_type));
+	SSL_write(ssl, type, strlen(type));
+	SSL_write(ssl, http_content_len, strlen(http_content_len));
+	SSL_write(ssl, content_len, strlen(content_len));
+	SSL_write(ssl, "\r\n\r\n", 4);
+	SSL_write(ssl, response, strlen(response));
+}
+
 /*
  * get_filename - Get filename relative to sfs_argopts.dir from the URI after
  * 		  resolving any symlinks.
