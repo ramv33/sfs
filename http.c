@@ -215,12 +215,16 @@ void serve_file(SSL *ssl, char *uri)
 	int ret;
 
 	rm_trailing_slash(uri);
-	if (get_filename(filename, sizeof(filename), uri) == -1)
+	if (get_filename(filename, sizeof(filename), uri) == -1) {
+		send_404(ssl, filename);
 		return;
+	}
 	PDEBUG("%s: file='%s'\n", __func__, filename);
 	if (ret = is_dir(filename)) {
-		if (ret == -1)
+		if (ret == -1) {
+			send_404(ssl, filename);
 			return;
+		}
 		char *html = mkhtml(filename);
 		send_response_headers(ssl, "text/html", strlen(html));
 		SSL_write(ssl, html, strlen(html));
