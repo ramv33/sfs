@@ -1,5 +1,3 @@
-DEBUG=y
-
 ifeq ($(DEBUG), y)
 	CFLAGS += -O -g -DDEBUG
 else
