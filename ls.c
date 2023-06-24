@@ -48,16 +48,24 @@ int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 	return *bufsize;
 }
 
-char *mkhtml(const char *dir)
+char *mkhtml(const char *dir, const char *uri)
 {
 	struct dirent *dentry;
 	size_t bufsize = BUFFSIZE;
+	char path[PATH_MAX], *dir_end;
 	char *html = malloc(sizeof(*html) * bufsize);
 	struct stat sb;
 	DIR *dirp;
 
 	if ((dirp = opendir(dir)) == NULL)
 		return NULL;
+
+	/* dir_end holds the end of the dir */
+	dir_end = stpcpy(path, dir);
+	/* replace '\0' with '/' for concatenating the filename */
+	*dir_end = '/';
+	*++dir_end = '\0';
+
 	appendstr(html, &bufsize, BUFFSIZEINC, "<!doctype html>\n"
 			"<head>\n"
 			"<title>Index of %s</title>\n"
@@ -75,7 +83,8 @@ char *mkhtml(const char *dir)
 		/* do not show hidden files */
 		if (strcmp(dentry->d_name, ".")) {
 			char *fname = dentry->d_name;
-			if (stat(fname, &sb) < 0) {
+			strcat(path, fname);
+			if (stat(path, &sb) < 0) {
 				perror("stat");
 				continue;
 			}
@@ -94,6 +103,7 @@ char *mkhtml(const char *dir)
 				return NULL;
 			}
 		}
+		*dir_end = '\0';
 	}
 	appendstr(html, &bufsize, BUFFSIZEINC, "</body>\n</html>");
 	return html;
