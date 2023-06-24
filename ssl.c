@@ -127,9 +127,12 @@ ssize_t ssl_readline(SSL *ssl, char *buf, size_t size, int *err)
 			*p = '\0';
 			return i;
 		}
-		if (*p++ == '\n')
+		if (*p++ == '\n') {
+			++i;
 			break;
+		}
 	}
+out:
 	*p = '\0';
 	return i;
 }
