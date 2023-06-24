@@ -51,7 +51,7 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 	/* TODO: check for Connection: close header and set *close=1 */
 	*close = 0;
 	/* check for empty line that terminates the request headers */
-	while (strcmp(buf, "\r\n")) {
+	while (strcmp(buf, "\r\n") && strcmp(buf, "\n")) {
 		PDEBUG("%s", buf);
 		if (ssl_readline(ssl, buf, sizeof(buf), &err) == 0) {
 			if (err) {
