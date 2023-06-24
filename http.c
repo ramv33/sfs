@@ -36,7 +36,7 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 	PDEBUG("%s: Waiting to read\n", __func__);
 	if (ssl_readline(ssl, buf, LINE_MAXLEN, &err) == 0) {
 		if (err) {
-			fprintf(stderr, "error reading request headers\n");
+			fprintf(stderr, "[*] error reading request headers\n");
 			return -1;
 		}
 		/* nothing to read */
@@ -55,7 +55,7 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 		PDEBUG("%s", buf);
 		if (ssl_readline(ssl, buf, sizeof(buf), &err) == 0) {
 			if (err) {
-				fprintf(stderr, "error reading request headers\n");
+				fprintf(stderr, "[*] error reading request headers\n");
 				return -1;
 			}
 			return 0;
@@ -71,7 +71,8 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 			*close = 1;
 		}
 	}
-	PDEBUG("%s: finished reading request headers\n", __func__);
+	PDEBUG("===============\n"
+		"%s: finished reading request headers\n\n", __func__);
 	return 1;
 }
 
@@ -256,9 +257,9 @@ void http_handle(SSL *ssl)
 
 	while (http_read_req(ssl, method, sizeof(method), uri, sizeof(uri),
 			     &close) >= 0) {
-		printf("method='%s', uri='%s'\n", method, uri);
+		printf("[-] method='%s', uri='%s'\n", method, uri);
 		if (strncasecmp(method, "GET", 4) && strncasecmp(method, "HEAD", 5)) {
-			printf("Method not implemented\n");
+			printf("[*] method not implemented\n");
 			return;
 		}
 
@@ -270,4 +271,5 @@ void http_handle(SSL *ssl)
 		if (close)
 			break;
 	}
+	printf("[-] connection closed\n");
 }
