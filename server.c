@@ -131,6 +131,8 @@ void *server_thread(void *arg)
 	SSL_free(ssl);
 	close(targ->connfd);
 
+	targ->tid->running = false;
+
 	pthread_exit(NULL);
 }
 
