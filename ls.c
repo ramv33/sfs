@@ -66,6 +66,8 @@ char *mkhtml(const char *dir, const char *uri)
 	*dir_end = '/';
 	*++dir_end = '\0';
 
+	/* Set to empty string; without it, there may be garbage in the beginning */
+	*html = '\0';
 	appendstr(html, &bufsize, BUFFSIZEINC, "<!doctype html>\n"
 			"<head>\n"
 			"<title>Index of %s</title>\n"
