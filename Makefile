@@ -1,7 +1,7 @@
 ifeq ($(DEBUG), y)
-	CFLAGS += -O -g -DDEBUG
+	CFLAGS += -O -g -DDEBUG -Wall -Wextra
 else
-	CFLAGS += -O2
+	CFLAGS += -O2 -Wall -Wextra
 endif
 
 OBJS = ls.o ssl.o http.o
