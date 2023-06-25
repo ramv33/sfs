@@ -256,7 +256,7 @@ void http_handle(SSL *ssl)
 	int close = 0;
 
 	while (http_read_req(ssl, method, sizeof(method), uri, sizeof(uri),
-			     &close) >= 0) {
+			     &close) > 0) {
 		printf("[-] method='%s', uri='%s'\n", method, uri);
 		if (strncasecmp(method, "GET", 4) && strncasecmp(method, "HEAD", 5)) {
 			printf("[*] method not implemented\n");
