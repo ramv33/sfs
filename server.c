@@ -35,16 +35,16 @@ struct thread {
 static void parse_args(int *argc, char **argv);
 void *server_thread(void *arg);
 int find_free_thread(struct thread *threads, int nthreads);
-struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, int ti);
+struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, struct thread *thread);
 int create_socket(int port);
 
 pthread_mutex_t threads_lock;
-struct thread threads[NUM_THREADS];
 
 int main(int argc, char **argv)
 {
 	struct sockaddr_in clientaddr;
 	struct thread_arg *targ = NULL;
+	struct thread *threads = NULL;
 	SSL_CTX *ssl_ctx = NULL;
 	char addrstr[INET_ADDRSTRLEN];
 	char *dir = NULL;
@@ -59,6 +59,13 @@ int main(int argc, char **argv)
 		dir = getcwd(NULL, 0);	// NOTE: has to be freed
 	puts(dir);
 
+	threads = calloc(sfs_argopts.nthreads, sizeof(*threads));
+	if (!threads) {
+		fprintf(stderr, "cannot create threads (nthreads=%d)\n",
+			sfs_argopts.nthreads);
+		exit(EXIT_FAILURE);
+	}
+
 	rm_trailing_slash(dir);
 	sfs_argopts.dir = dir;
 
@@ -69,8 +76,6 @@ int main(int argc, char **argv)
 	ssl_ctx = create_context();
 	/* configure server context with appropriate key files */
 	configure_context(ssl_ctx);
-
-	bzero(threads, sizeof(threads));
 
 	while (true) {
 		socklen_t clientlen = sizeof(clientaddr);
@@ -85,14 +90,14 @@ int main(int argc, char **argv)
 			addrstr, sizeof(addrstr)), clientaddr.sin_port);
 
 		/* thread creation */
-		ti = find_free_thread(threads, NUM_THREADS);
+		ti = find_free_thread(threads, sfs_argopts.nthreads);
 		threads[ti].running = true;
 		if (ti == -1) {
 			fprintf(stderr, "[*] out of threads, closing connection\n");
 			close(connfd);
 			continue;
 		}
-		targ = thread_arg_create(ssl_ctx, connfd, ti);
+		targ = thread_arg_create(ssl_ctx, connfd, &threads[ti]);
 		if (pthread_create(&threads[ti].tid, NULL, server_thread, targ)) {
 			fprintf(stderr, "[*] error creating thread\n");
 			threads[ti].running = false;
@@ -136,7 +141,7 @@ void *server_thread(void *arg)
 	pthread_exit(NULL);
 }
 
-struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, int ti)
+struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, struct thread *thread)
 {
 	struct thread_arg *targ = malloc(sizeof(*targ));
 
@@ -145,7 +150,7 @@ struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, int ti)
 
 	targ->ssl_ctx = ssl_ctx;
 	targ->connfd = connfd;
-	targ->thread = &threads[ti];
+	targ->thread = thread;
 
 	return targ;
 }
@@ -165,12 +170,13 @@ static void parse_args(int *argc, char **argv)
 	static struct option long_options[] = {
 		{"port", required_argument, NULL, 'p'},
 		{"all", no_argument, NULL, 'a'},
-		{"no-recurse", no_argument, NULL, 'R'}
+		{"no-recurse", no_argument, NULL, 'R'},
+		{"num-threads", required_argument, NULL, 't'},
 	};
 
 	/* defaults */
 	sfs_argopts.port = DEFAULT_PORT;
-
+	sfs_argopts.nthreads = DEFAULT_NTHREADS;
 	while (1) {
 		if ((c = getopt_long(*argc, argv, "p:aR", long_options, NULL)) == -1)
 			break;
@@ -186,6 +192,14 @@ static void parse_args(int *argc, char **argv)
 			case 'R':
 				PDEBUG("no_recurse\n");
 				sfs_argopts.no_recurse = 1;
+				break;
+			case 't':
+				sfs_argopts.nthreads = strtol(optarg, NULL, 10);
+				PDEBUG("nthreads=%d\n", sfs_argopts.nthreads);
+				if (sfs_argopts.nthreads <= 0) {
+					fprintf(stderr, "Number of threads must be > 0\n");
+					exit(EXIT_FAILURE);
+				}
 		}
 	}
 	/* If a directory name is passed, serve files from that directory.

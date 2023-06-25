@@ -8,12 +8,13 @@
 #	define PDEBUG(fmt, args...)	/* not debugging; do nothing */
 #endif
 
-#define NUM_THREADS	16
+#define DEFAULT_NTHREADS	2
 
 struct argopts {
 	int		no_recurse;
 	int		show_hidden;
 	int		port;
+	int		nthreads;
 	const char 	*dir;
 };
 
