@@ -105,7 +105,7 @@ ssize_t read_ssl(SSL *ssl, char *rxbuf, size_t size)
  */
 ssize_t ssl_readline(SSL *ssl, char *buf, size_t size, int *err)
 {
-	ssize_t i;
+	size_t i;
 	char *p = buf;
 	int ret;
 
