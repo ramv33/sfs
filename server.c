@@ -69,6 +69,7 @@ int main(int argc, char **argv)
 		if (SSL_accept(ssl) <= 0) {
 			fprintf(stderr, "SSL_accept failed: ");
 			ERR_print_errors_fp(stderr);
+			close(connfd);
 			continue;
 		} else {
 			puts("Client SSL connection accepted");
@@ -88,8 +89,6 @@ exit:
 
 	if (!argc)
 		free(dir);
-	if (connfd != -1)
-		close(connfd);
 	if (sockfd != -1)
 		close(connfd);
 
