@@ -118,6 +118,7 @@ ssize_t ssl_readline(SSL *ssl, char *buf, size_t size, int *err)
 		case SSL_ERROR_NONE:
 		case SSL_ERROR_WANT_READ:
 			break;
+			// goto out;
 		case SSL_ERROR_ZERO_RETURN:
 			*p = '\0';
 			return i;
