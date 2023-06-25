@@ -23,7 +23,7 @@ struct argopts sfs_argopts;
 
 struct thread_arg {
 	SSL_CTX		*ssl_ctx;
-	struct thread	*tid;
+	struct thread	*thread;
 	int		connfd;
 };
 
@@ -131,7 +131,7 @@ void *server_thread(void *arg)
 	SSL_free(ssl);
 	close(targ->connfd);
 
-	targ->tid->running = false;
+	targ->thread->running = false;
 
 	pthread_exit(NULL);
 }
@@ -145,7 +145,7 @@ struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, int ti)
 
 	targ->ssl_ctx = ssl_ctx;
 	targ->connfd = connfd;
-	targ->tid = &threads[ti];
+	targ->thread = &threads[ti];
 
 	return targ;
 }
