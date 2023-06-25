@@ -104,6 +104,7 @@ int main(int argc, char **argv)
 			close(connfd);
 		}
 	}
+
 	SSL_CTX_free(ssl_ctx);
 
 	if (!argc)
