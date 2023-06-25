@@ -20,6 +20,11 @@
 
 struct argopts sfs_argopts;
 
+struct thread_arg {
+	SSL *ssl_ctx;
+	int connfd;
+};
+
 static void parse_args(int *argc, char **argv);
 int create_socket(int port);
 
