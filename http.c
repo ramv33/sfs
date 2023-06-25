@@ -226,7 +226,7 @@ void serve_file(SSL *ssl, char *uri)
 			send_404(ssl, filename);
 			return;
 		}
-		char *html = mkhtml(filename);
+		char *html = mkhtml(filename, uri);
 		send_response_headers(ssl, "text/html", strlen(html));
 		SSL_write(ssl, html, strlen(html));
 		/* send directory contents */

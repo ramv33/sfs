@@ -8,7 +8,7 @@
 	} while (0)
 
 /* create html page for given directory, listing the files */
-char *mkhtml(const char *dir);
+char *mkhtml(const char *dir, const char *uri);
 
 /* append to $str; realloc if necessary */
 int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...);

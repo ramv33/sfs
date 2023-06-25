@@ -91,12 +91,13 @@ char *mkhtml(const char *dir, const char *uri)
 			char fsize[64] = "";
 			if (!S_ISDIR(sb.st_mode))
 				sprintf(fsize, "%ld", sb.st_size);
+			/* add URI in href; without it will try to access from root */
 			int ret = appendstr(html, &bufsize, BUFFSIZEINC,
 				"<tr>\n"
-				"<td><a href=/%s>%s</a></td>\n"
+				"<td><a href=%s%s>%s</a></td>\n"
 				"<td>%s</td>\n"
 				"</tr>\n",
-				fname, fname, fsize);
+				uri, fname, fname, fsize);
 			if (ret == -1) {
 				fprintf(stderr, "realloc failed: out of memory\n");
 				free(html);
