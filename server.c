@@ -95,7 +95,7 @@ exit:
 	if (!argc)
 		free(dir);
 	if (sockfd != -1)
-		close(connfd);
+		close(sockfd);
 
 	return 0;
 }
