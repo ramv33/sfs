@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <getopt.h>
+#include <pthread.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -25,18 +26,30 @@ struct thread_arg {
 	pthread_t	*tid;
 	int		connfd;
 };
+
+struct thread {
+	pthread_t	tid;
+	bool		running;
 };
 
 static void parse_args(int *argc, char **argv);
+void *server_thread(void *arg);
+int find_free_thread(struct thread *threads, int nthreads);
+struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, int ti);
 int create_socket(int port);
+
+pthread_mutex_t threads_lock;
+struct thread threads[NUM_THREADS];
 
 int main(int argc, char **argv)
 {
 	struct sockaddr_in clientaddr;
-	char *dir = NULL, addrstr[INET_ADDRSTRLEN];
-	int sockfd, connfd;
+	struct thread_arg *targ = NULL;
 	SSL_CTX *ssl_ctx = NULL;
-	SSL *ssl = NULL;
+	char addrstr[INET_ADDRSTRLEN];
+	char *dir = NULL;
+	int sockfd, connfd;
+	int ti;
 
 	parse_args(&argc, argv);
 	/* If argc is non-zero, it points to the directory argument */
@@ -57,10 +70,13 @@ int main(int argc, char **argv)
 	/* configure server context with appropriate key files */
 	configure_context(ssl_ctx);
 
+	bzero(threads, sizeof(threads));
+
 	while (true) {
 		socklen_t clientlen = sizeof(clientaddr);
 		connfd = accept(sockfd, (struct sockaddr *)&clientaddr, &clientlen);
 		if (connfd == -1) {
+			/* do not exit? */
 			errmsg("accept");
 			close(sockfd);
 			exit(EXIT_FAILURE);
@@ -68,29 +84,20 @@ int main(int argc, char **argv)
 		printf("%s:%d connected\n", inet_ntop(AF_INET, &clientaddr.sin_addr,
 			addrstr, sizeof(addrstr)), clientaddr.sin_port);
 
-		/* create server SSL structure using newly accepted client socket */
-		ssl = SSL_new(ssl_ctx);
-		SSL_set_fd(ssl, connfd);
-
-		/* wait for SSL connection from client */
-		if (SSL_accept(ssl) <= 0) {
-			fprintf(stderr, "SSL_accept failed: ");
-			ERR_print_errors_fp(stderr);
+		/* thread creation */
+		ti = find_free_thread(threads, NUM_THREADS);
+		threads[ti].running = true;
+		if (ti == -1) {
+			fprintf(stderr, "[*] out of threads, closing connection\n");
 			close(connfd);
 			continue;
-		} else {
-			puts("Client SSL connection accepted");
 		}
-		http_handle(ssl);
-		PDEBUG("closing connection...\n");
-		SSL_shutdown(ssl);
-		SSL_free(ssl);
-		close(connfd);
-	}
-exit:
-	if (ssl != NULL) {
-		SSL_shutdown(ssl);
-		SSL_free(ssl);
+		targ = thread_arg_create(ssl_ctx, connfd, ti);
+		if (pthread_create(&threads[ti].tid, NULL, server_thread, targ)) {
+			fprintf(stderr, "[*] error creating thread\n");
+			threads[ti].running = false;
+			close(connfd);
+		}
 	}
 	SSL_CTX_free(ssl_ctx);
 
@@ -100,6 +107,53 @@ exit:
 		close(sockfd);
 
 	return 0;
+}
+
+void *server_thread(void *arg)
+{
+	struct thread_arg *targ = arg;
+	SSL *ssl = NULL;
+
+	ssl = SSL_new(targ->ssl_ctx);
+	SSL_set_fd(ssl, targ->connfd);
+
+	if (SSL_accept(ssl) <= 0) {
+		fprintf(stderr, "SSL_accept failed: ");
+		ERR_print_errors_fp(stderr);
+		pthread_exit(NULL);
+	} else {
+		printf("[+] Client SSL connection accepted\n");
+	}
+
+	http_handle(ssl);
+	printf("[-] Closing connection\n");
+	SSL_shutdown(ssl);
+	SSL_free(ssl);
+	close(targ->connfd);
+
+	pthread_exit(NULL);
+}
+
+struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, int ti)
+{
+	struct thread_arg *targ = malloc(sizeof(*targ));
+
+	if (!targ)
+		return NULL;
+
+	targ->ssl_ctx = ssl_ctx;
+	targ->connfd = connfd;
+	targ->ti = ti;
+
+	return targ;
+}
+
+int find_free_thread(struct thread *threads, int nthreads)
+{
+	for (int i = 0; i < nthreads; i++)
+		if (!threads[i].running)
+			return i;
+	return -1;
 }
 
 static void parse_args(int *argc, char **argv)

@@ -8,6 +8,8 @@
 #	define PDEBUG(fmt, args...)	/* not debugging; do nothing */
 #endif
 
+#define NUM_THREADS	16
+
 struct argopts {
 	int		no_recurse;
 	int		show_hidden;
