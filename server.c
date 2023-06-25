@@ -21,9 +21,9 @@
 struct argopts sfs_argopts;
 
 struct thread_arg {
-	SSL_CTX *ssl_ctx;
-	int connfd;
-	int ti;		/* index in threads array */
+	SSL_CTX		*ssl_ctx;
+	pthread_t	*tid;
+	int		connfd;
 };
 };
 
