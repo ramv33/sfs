@@ -21,8 +21,10 @@
 struct argopts sfs_argopts;
 
 struct thread_arg {
-	SSL *ssl_ctx;
+	SSL_CTX *ssl_ctx;
 	int connfd;
+	int ti;		/* index in threads array */
+};
 };
 
 static void parse_args(int *argc, char **argv);
