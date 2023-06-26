@@ -91,25 +91,14 @@ int main(int argc, char **argv)
 		printf("%s:%d connected\n", inet_ntop(AF_INET, &clientaddr.sin_addr,
 			addrstr, sizeof(addrstr)), clientaddr.sin_port);
 
-<<<<<<< HEAD
-		/* create server SSL structure using newly accepted client socket */
-		ssl = SSL_new(ssl_ctx);
-		SSL_set_fd(ssl, connfd);
-
-		/* wait for SSL connection from client */
-		if (SSL_accept(ssl) <= 0) {
-			fprintf(stderr, "SSL_accept failed: ");
-			ERR_print_errors_fp(stderr);
-=======
 		/* thread creation */
 		ti = find_free_thread(threads, sfs_argopts.nthreads);
-		threads[ti].running = true;
 		if (ti == -1) {
 			fprintf(stderr, "[*] out of threads, closing connection\n");
->>>>>>> thread
 			close(connfd);
 			continue;
 		}
+		threads[ti].running = true;
 		/* has to be freed by the thread */
 		targ = thread_arg_create(ssl_ctx, connfd, &threads[ti]);
 		if (pthread_create(&threads[ti].tid, NULL, server_thread, targ)) {
