@@ -63,11 +63,12 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 		return 0;
 	}
 	PDEBUG("%s: read request line\n", __func__);
-	puts(buf);
+	printf("%s", buf);
 	if (get_method_and_uri(buf, method, method_size, uri, uri_size) != 2) {
 		fprintf(stderr, "[*] invalid request '%s'\n", buf);
 		return 1;
 	}
+
 	PDEBUG("\n\nRequest Headers\n"
 		"===============\n");
 	/* TODO: check for Connection: close header and set *close=1 */
