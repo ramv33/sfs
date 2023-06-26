@@ -45,7 +45,7 @@ int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 		str = realloc(str, *bufsize);
 		if (str == NULL)
 			return -1;
-		ret = vsnprintf(str, ret, fmt, ap);
+		ret = vsnprintf(str+len, ret, fmt, ap);
 	}
 	return *bufsize;
 }
