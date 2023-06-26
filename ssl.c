@@ -73,14 +73,14 @@ SSL_CTX* create_context(void)
 	return ctx;
 }
 
-void configure_context(SSL_CTX *ctx)
+void configure_context(SSL_CTX *ctx, const char *cert, const char *key)
 {
-	if (SSL_CTX_use_certificate_chain_file(ctx, "cert.pem") <= 0) {
+	if (SSL_CTX_use_certificate_chain_file(ctx, cert) <= 0) {
 		ERR_print_errors_fp(stderr);
 		exit(EXIT_FAILURE);
 	}
 
-	if (SSL_CTX_use_PrivateKey_file(ctx, "key.pem", SSL_FILETYPE_PEM) <= 0) {
+	if (SSL_CTX_use_PrivateKey_file(ctx, key, SSL_FILETYPE_PEM) <= 0) {
 		ERR_print_errors_fp(stderr);
 		exit(EXIT_FAILURE);
 	}

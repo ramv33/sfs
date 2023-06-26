@@ -8,11 +8,18 @@
 #	define PDEBUG(fmt, args...)	/* not debugging; do nothing */
 #endif
 
+#define DEFAULT_NTHREADS	2
+#define DEFAULT_KEY_FILE	"key.pem"
+#define DEFAULT_CERT_FILE	"cert.pem"
+
 struct argopts {
 	int		no_recurse;
 	int		show_hidden;
 	int		port;
+	int		nthreads;
 	const char 	*dir;
+	const char	*cert;
+	const char	*key;
 };
 
 extern struct argopts sfs_argopts;

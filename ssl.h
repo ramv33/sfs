@@ -11,7 +11,7 @@ int create_socket(int port);
 SSL_CTX *create_context(void);
 
 /* configure server context with certifcate and private key */
-void configure_context(SSL_CTX *ctx);
+void configure_context(SSL_CTX *ctx, const char *cert, const char *key);
 
 /* read from SSL connection */
 ssize_t ssl_read(SSL *ssl, char *rxbuf, size_t size);

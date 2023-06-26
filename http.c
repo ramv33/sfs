@@ -127,11 +127,6 @@ static int get_filename(char *filename, size_t size, const char *uri)
 	return 0;
 }
 
-static int get_file_fd(const char *filename)
-{
-
-}
-
 static void send_file_stats(SSL *ssl, int fd, const char *filename)
 {
 	char filetype[64], content_len[32];
