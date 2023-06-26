@@ -275,7 +275,7 @@ void http_handle(SSL *ssl)
 		printf("[-] method='%s', uri='%s'\n", method, uri);
 		if (strncasecmp(method, "GET", 4) && strncasecmp(method, "HEAD", 5)) {
 			printf("[*] method not implemented\n");
-			return;
+			continue;
 		}
 
 		if (!strcasecmp(method, "GET"))
