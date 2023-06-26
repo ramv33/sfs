@@ -36,11 +36,12 @@ struct thread {
 	bool		running;
 };
 
+int create_socket(int port);
 static void parse_args(int *argc, char **argv);
 void *server_thread(void *arg);
 int find_free_thread(struct thread *threads, int nthreads);
-struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, struct thread *thread);
-int create_socket(int port);
+struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, struct thread *thread,
+				     char *inet_addr, short port);
 
 pthread_mutex_t threads_lock;
 
