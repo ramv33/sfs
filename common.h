@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H 1
 
+#include <string.h>
+
 #undef PDEBUG
 #ifdef DEBUG
 #	define PDEBUG(fmt, args...) fprintf(stderr, fmt, ## args)

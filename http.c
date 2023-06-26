@@ -27,6 +27,25 @@ const char *http_content_len = "Content-length: ";
 const char *http_keep_alive = "Connection: keep-alive\r\n";
 const char *http_close = "Connection: close\r\n";
 
+static int get_method_and_uri(char *buf, char *method, size_t method_size,
+				char *uri, size_t uri_size)
+{
+	char *saveptr;
+	char *token;
+
+	token = strtok_r(buf, " \t", &saveptr);
+	if (!token)
+		return 0;
+	strncpy(method, token, method_size-1);
+
+	token = strtok_r(NULL, " \t", &saveptr);
+	if (!token)
+		return 1;
+	strncpy(uri, token, uri_size-1);
+
+	return 2;
+}
+
 int http_read_req(SSL *ssl, char *method, size_t method_size,
 		   char *uri, size_t uri_size, int *close)
 {
@@ -45,7 +64,10 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 	}
 	PDEBUG("%s: read request line\n", __func__);
 	puts(buf);
-	sscanf(buf, "%s %s", method, uri);
+	if (get_method_and_uri(buf, method, method_size, uri, uri_size) != 2) {
+		fprintf(stderr, "[*] invalid request '%s'\n", buf);
+		return 1;
+	}
 	PDEBUG("\n\nRequest Headers\n"
 		"===============\n");
 	/* TODO: check for Connection: close header and set *close=1 */
@@ -250,6 +272,7 @@ void http_handle(SSL *ssl)
 	char filename[LINE_MAXLEN];
 	int close = 0;
 
+	method[0] = uri[0] = '\0';
 	while (http_read_req(ssl, method, sizeof(method), uri, sizeof(uri),
 			     &close) > 0) {
 		printf("[-] method='%s', uri='%s'\n", method, uri);
