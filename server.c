@@ -130,7 +130,7 @@ void *server_thread(void *arg)
 	SSL_set_fd(ssl, targ->connfd);
 
 	if (SSL_accept(ssl) <= 0) {
-		fprintf(stderr, "SSL_accept failed: ");
+		fprintf(stderr, "[*] SSL_accept failed: ");
 		ERR_print_errors_fp(stderr);
 		pthread_exit(NULL);
 	} else {
