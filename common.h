@@ -22,9 +22,9 @@ static void rm_trailing_slash(char *dir)
 	char *endp = dir + strlen(dir) - 1;
 	char *p = endp;
 
-	while (p > dir && *p == '/')
+	while (p >= dir && *p == '/')
 		--p;
-	if (++p != endp)
+	if (++p <= endp)
 		*++p = '\0';
 }
 
