@@ -99,12 +99,14 @@ int main(int argc, char **argv)
 			close(connfd);
 			continue;
 		}
+		/* has to be freed by the thread */
 		targ = thread_arg_create(ssl_ctx, connfd, &threads[ti]);
 		if (pthread_create(&threads[ti].tid, NULL, server_thread, targ)) {
 			fprintf(stderr, "[*] error creating thread\n");
 			threads[ti].running = false;
 			close(connfd);
 		}
+		targ = NULL;
 	}
 
 	SSL_CTX_free(ssl_ctx);
@@ -140,6 +142,7 @@ void *server_thread(void *arg)
 	close(targ->connfd);
 
 	targ->thread->running = false;
+	free(targ);
 
 	pthread_exit(NULL);
 }
