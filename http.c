@@ -108,7 +108,7 @@ void send_404(SSL *ssl, const char *filename)
 	const char *type = "text/html\r\n";
 	char content_len[32];
 
-	sprintf(content_len, "%d", strlen(response));
+	sprintf(content_len, "%ld", strlen(response));
 
 	PDEBUG("%s\n", __func__);
 	SSL_write(ssl, http_notfound, strlen(http_notfound));
@@ -134,7 +134,7 @@ static int get_filename(char *filename, size_t size, const char *uri)
 	char *r = NULL;
 
 	/* need to check their usage again */
-	strncpy(filename, sfs_argopts.dir, size);
+	strncpy(filename, sfs_argopts.dir, size-1);
 	strncat(filename, uri, size-1);
 
 	PDEBUG("%s: filename='%s'\n", __func__, filename);
@@ -143,7 +143,7 @@ static int get_filename(char *filename, size_t size, const char *uri)
 		perror("Failed to find URI");
 		return -1;
 	}
-	strncpy(filename, r, size);
+	strncpy(filename, r, size-1);
 	free(r);
 
 	return 0;
@@ -159,7 +159,7 @@ static void send_file_stats(SSL *ssl, int fd, const char *filename)
 		return;
 	}
 	get_filetype(filename, filetype, sizeof(filetype));
-	sprintf(content_len, "%d", sb.st_size);
+	sprintf(content_len, "%ld", sb.st_size);
 
 	SSL_write(ssl, http_ok, strlen(http_ok));
 	SSL_write(ssl, http_server, strlen(http_server));
@@ -208,7 +208,7 @@ static void send_response_headers(SSL *ssl, const char *type, const size_t len)
 {
 	char content_len[32];
 
-	sprintf(content_len, "%d", len);
+	sprintf(content_len, "%ld", len);
 	
 	SSL_write(ssl, http_ok, strlen(http_ok));
 	SSL_write(ssl, http_server, strlen(http_server));
@@ -238,7 +238,7 @@ void serve_file(SSL *ssl, char *uri)
 		return;
 	}
 	PDEBUG("%s: file='%s'\n", __func__, filename);
-	if (ret = is_dir(filename)) {
+	if ((ret = is_dir(filename))) {
 		if (ret == -1) {
 			send_404(ssl, filename);
 			return;
@@ -266,10 +266,7 @@ void head_file(SSL *ssl, char *uri)
 
 void http_handle(SSL *ssl)
 {
-	ssize_t ret;
-	char buf[LINE_MAXLEN];
 	char method[METHOD_MAXLEN], uri[URI_MAXLEN];
-	char filename[LINE_MAXLEN];
 	int close = 0;
 
 	method[0] = uri[0] = '\0';
