@@ -32,6 +32,8 @@ int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 	len = strlen(str);
 	ret = vsnprintf(str+len, *bufsize-len, fmt, ap);
 	if (ret >= (*bufsize-len)) {
+		/* ap is undefined after call to vsnprintf */
+		va_start(ap, fmt);
 		// more than bufinc extra space needed? 
 		if ((ret - (*bufsize-len)) >= bufinc) {
 			size_t newbufinc = ret - (*bufsize-len);
