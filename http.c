@@ -286,5 +286,4 @@ void http_handle(SSL *ssl)
 		if (close)
 			break;
 	}
-	printf("[-] connection closed\n");
 }
