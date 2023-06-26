@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 		ti = find_free_thread(threads, sfs_argopts.nthreads);
 		if (ti == -1) {
 			fprintf(stderr, "[*] out of threads, closing connection to %s:%d\n",
-				addrstr, clientaddr.sin_port);
+				addrstr, ntohs(clientaddr.sin_port));
 			close(connfd);
 			continue;
 		}
@@ -132,15 +132,18 @@ void *server_thread(void *arg)
 	SSL_set_fd(ssl, targ->connfd);
 
 	if (SSL_accept(ssl) <= 0) {
-		fprintf(stderr, "[*] SSL_accept failed: ");
+		fprintf(stderr, "[*] SSL_accept failed (%s:%d): ",
+			targ->inet_addr, ntohs(targ->port));
 		ERR_print_errors_fp(stderr);
 		pthread_exit(NULL);
 	} else {
-		printf("[+] Client SSL connection accepted\n");
+		printf("[+] Client SSL connection accepted (%s:%d)\n",
+			targ->inet_addr, ntohs(targ->port));
 	}
 
 	http_handle(ssl);
-	printf("[-] Closing connection\n");
+	printf("[-] Closing connection (%s:%d)\n",
+		targ->inet_addr, ntohs(targ->port));
 	SSL_shutdown(ssl);
 	SSL_free(ssl);
 	close(targ->connfd);
