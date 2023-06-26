@@ -278,7 +278,7 @@ void http_handle(SSL *ssl)
 			return;
 		}
 
-		if (!strcmp(method, "GET"))
+		if (!strcasecmp(method, "GET"))
 			serve_file(ssl, uri);
 		else
 			head_file(ssl, uri);
