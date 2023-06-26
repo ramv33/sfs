@@ -7,7 +7,7 @@ endif
 OBJS = ls.o ssl.o http.o
 LIBS = -lssl -lcrypto
 
-server: $(OBJS) $(LIBS)
+server: $(OBJS) $(LIBS) common.h
 
 http.o: ssl.o ls.o
 
