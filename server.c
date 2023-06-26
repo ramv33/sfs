@@ -72,10 +72,10 @@ int main(int argc, char **argv)
 	sockfd = create_socket(sfs_argopts.port);
 	if (sockfd == -1)
 		exit(EXIT_FAILURE);
-	/* create SSL context */
+
+	/* SSL context - only one */
 	ssl_ctx = create_context();
-	/* configure server context with appropriate key files */
-	configure_context(ssl_ctx);
+	configure_context(ssl_ctx, sfs_argopts.cert, sfs_argopts.key);
 
 	while (true) {
 		socklen_t clientlen = sizeof(clientaddr);
@@ -173,13 +173,18 @@ static void parse_args(int *argc, char **argv)
 		{"all", no_argument, NULL, 'a'},
 		{"no-recurse", no_argument, NULL, 'R'},
 		{"num-threads", required_argument, NULL, 't'},
+		{"key", required_argument, NULL, 'k'},
+		{"cert", required_argument, NULL, 'c'},
 	};
 
 	/* defaults */
 	sfs_argopts.port = DEFAULT_PORT;
 	sfs_argopts.nthreads = DEFAULT_NTHREADS;
+	sfs_argopts.key = DEFAULT_KEY_FILE;
+	sfs_argopts.cert = DEFAULT_CERT_FILE;
+
 	while (1) {
-		if ((c = getopt_long(*argc, argv, "p:aR", long_options, NULL)) == -1)
+		if ((c = getopt_long(*argc, argv, "p:aRtkc", long_options, NULL)) == -1)
 			break;
 		switch (c) {
 			case 'p':
@@ -201,6 +206,13 @@ static void parse_args(int *argc, char **argv)
 					fprintf(stderr, "Number of threads must be > 0\n");
 					exit(EXIT_FAILURE);
 				}
+				break;
+			case 'k':
+				sfs_argopts.key = optarg;
+				break;
+			case 'c':
+				sfs_argopts.key = optarg;
+				break;
 		}
 	}
 	/* If a directory name is passed, serve files from that directory.
