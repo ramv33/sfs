@@ -41,11 +41,11 @@ int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 			newbufinc += -newbufinc % bufinc;
 			bufinc = newbufinc;
 		}
-		str = realloc(str, *bufsize+bufinc);
+		*bufsize += bufinc;
+		str = realloc(str, *bufsize);
 		if (str == NULL)
 			return -1;
-		*bufsize += bufinc;
-		ret = vsnprintf(str, *bufsize, fmt, ap);
+		ret = vsnprintf(str, ret, fmt, ap);
 	}
 	return *bufsize;
 }
