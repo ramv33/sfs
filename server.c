@@ -198,7 +198,7 @@ static void parse_args(int *argc, char **argv)
 	sfs_argopts.cert = DEFAULT_CERT_FILE;
 
 	while (1) {
-		if ((c = getopt_long(*argc, argv, "p:aRtkc", long_options, NULL)) == -1)
+		if ((c = getopt_long(*argc, argv, "p:aRt:k:c:", long_options, NULL)) == -1)
 			break;
 		switch (c) {
 			case 'p':
