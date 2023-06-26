@@ -104,7 +104,8 @@ int main(int argc, char **argv)
 		}
 		threads[ti].running = true;
 		/* has to be freed by the thread */
-		targ = thread_arg_create(ssl_ctx, connfd, &threads[ti]);
+		targ = thread_arg_create(ssl_ctx, connfd, &threads[ti],
+					 addrstr, clientaddr.sin_port);
 		if (pthread_create(&threads[ti].tid, NULL, server_thread, targ)) {
 			fprintf(stderr, "[*] error creating thread for %s:%d\n",
 				addrstr, clientaddr.sin_port);
