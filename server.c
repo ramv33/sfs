@@ -27,6 +27,8 @@ struct thread_arg {
 	SSL_CTX		*ssl_ctx;
 	struct thread	*thread;
 	int		connfd;
+	char		inet_addr[INET_ADDRSTRLEN];
+	short		port;
 };
 
 struct thread {
@@ -149,7 +151,8 @@ void *server_thread(void *arg)
 	pthread_exit(NULL);
 }
 
-struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, struct thread *thread)
+struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, struct thread *thread,
+				     char *inet_addr, short port)
 {
 	struct thread_arg *targ = malloc(sizeof(*targ));
 
@@ -159,6 +162,8 @@ struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, struct thread
 	targ->ssl_ctx = ssl_ctx;
 	targ->connfd = connfd;
 	targ->thread = thread;
+	strcpy(targ->inet_addr, inet_addr);
+	targ->port = port;
 
 	return targ;
 }
