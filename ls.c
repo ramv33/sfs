@@ -22,7 +22,7 @@
 // 	return 0;
 // }
 
-int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
+char *appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 {
 	va_list ap;
 	size_t ret;
@@ -47,7 +47,7 @@ int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 			return -1;
 		ret = vsnprintf(str+len, ret, fmt, ap);
 	}
-	return *bufsize;
+	return str;
 }
 
 char *mkhtml(const char *dir, const char *uri)
@@ -70,13 +70,13 @@ char *mkhtml(const char *dir, const char *uri)
 
 	/* Set to empty string; without it, there may be garbage in the beginning */
 	*html = '\0';
-	appendstr(html, &bufsize, BUFFSIZEINC, "<!doctype html>\n"
+	html = appendstr(html, &bufsize, BUFFSIZEINC, "<!doctype html>\n"
 			"<head>\n"
 			"<title>Index of %s</title>\n"
 			"</head>\n"
 			"<body>\n"
 			"<h1>Index of %s</h1>\n", dir, dir);
-	appendstr(html, &bufsize, BUFFSIZEINC,
+	html = appendstr(html, &bufsize, BUFFSIZEINC,
 			"<table>\n"
 			"<tr>\n"
 			"<th>Name</th>\n"
@@ -95,23 +95,24 @@ char *mkhtml(const char *dir, const char *uri)
 			char fsize[64] = "";
 			if (!S_ISDIR(sb.st_mode))
 				sprintf(fsize, "%ld", sb.st_size);
+			else
+				sprintf(fsize, "directory");
 			/* add URI in href; without it will try to access from root */
-			int ret = appendstr(html, &bufsize, BUFFSIZEINC,
+			html = appendstr(html, &bufsize, BUFFSIZEINC,
 				"<tr>\n"
 				"<td><a href=%s%s%s>%s%s</a></td>\n"
 				"<td>%s</td>\n"
 				"</tr>\n",
 				uri, fname, S_ISDIR(sb.st_mode) ? "/" : "",
 				fname, S_ISDIR(sb.st_mode) ? "/" : "", fsize);
-			if (ret == -1) {
+			if (!html) {
 				fprintf(stderr, "realloc failed: out of memory\n");
-				free(html);
 				return NULL;
 			}
 		}
 		*dir_end = '\0';
 	}
-	appendstr(html, &bufsize, BUFFSIZEINC, "</body>\n</html>");
+	html = appendstr(html, &bufsize, BUFFSIZEINC, "</body>\n</html>");
 	return html;
 }
 

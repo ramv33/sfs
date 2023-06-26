@@ -11,7 +11,7 @@
 char *mkhtml(const char *dir, const char *uri);
 
 /* append to $str; realloc if necessary */
-int appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...);
+char *appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...);
 
 /* get file type of $filename and store in $filetype */
 void get_filetype(const char *filename, char *filetype, size_t size);
