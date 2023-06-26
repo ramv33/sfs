@@ -59,11 +59,11 @@ int main(int argc, char **argv)
 		dir = argv[argc];
 	else
 		dir = getcwd(NULL, 0);	// NOTE: has to be freed
-	puts(dir);
+	printf("[-] serving files from directory: %s\n", dir);
 
 	threads = calloc(sfs_argopts.nthreads, sizeof(*threads));
 	if (!threads) {
-		fprintf(stderr, "cannot create threads (nthreads=%d)\n",
+		fprintf(stderr, "[*] cannot create threads (nthreads=%d), out of memory\n",
 			sfs_argopts.nthreads);
 		exit(EXIT_FAILURE);
 	}
@@ -88,13 +88,14 @@ int main(int argc, char **argv)
 			close(sockfd);
 			exit(EXIT_FAILURE);
 		}
-		printf("%s:%d connected\n", inet_ntop(AF_INET, &clientaddr.sin_addr,
+		printf("[+] %s:%d connected\n", inet_ntop(AF_INET, &clientaddr.sin_addr,
 			addrstr, sizeof(addrstr)), clientaddr.sin_port);
 
 		/* thread creation */
 		ti = find_free_thread(threads, sfs_argopts.nthreads);
 		if (ti == -1) {
-			fprintf(stderr, "[*] out of threads, closing connection\n");
+			fprintf(stderr, "[*] out of threads, closing connection to %s:%d\n",
+				addrstr, clientaddr.sin_port);
 			close(connfd);
 			continue;
 		}
@@ -102,13 +103,14 @@ int main(int argc, char **argv)
 		/* has to be freed by the thread */
 		targ = thread_arg_create(ssl_ctx, connfd, &threads[ti]);
 		if (pthread_create(&threads[ti].tid, NULL, server_thread, targ)) {
-			fprintf(stderr, "[*] error creating thread\n");
+			fprintf(stderr, "[*] error creating thread for %s:%d\n",
+				addrstr, clientaddr.sin_port);
 			threads[ti].running = false;
 			close(connfd);
 		}
 		targ = NULL;
 	}
-
+	/* Will not reach here */
 	SSL_CTX_free(ssl_ctx);
 
 	if (!argc)
