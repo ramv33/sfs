@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
@@ -158,9 +160,18 @@ struct thread_arg *thread_arg_create(SSL_CTX *ssl_ctx, int connfd, struct thread
 
 int find_free_thread(struct thread *threads, int nthreads)
 {
-	for (int i = 0; i < nthreads; i++)
+	for (int i = 0; i < nthreads; ) {
 		if (!threads[i].running)
 			return i;
+		/* try to join thread */
+		if (!pthread_tryjoin_np(threads[i].tid, NULL))
+			return i;
+		else
+			++i;
+	}
+
+
+
 	return -1;
 }
 
