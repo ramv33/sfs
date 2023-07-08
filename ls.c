@@ -44,7 +44,7 @@ char *appendstr(char *str, size_t *bufsize, size_t bufinc, char *fmt, ...)
 		*bufsize += bufinc;
 		str = realloc(str, *bufsize);
 		if (str == NULL)
-			return -1;
+			return NULL;
 		ret = vsnprintf(str+len, ret, fmt, ap);
 	}
 	return str;
