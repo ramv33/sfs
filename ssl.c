@@ -133,7 +133,6 @@ ssize_t ssl_readline(SSL *ssl, char *buf, size_t size, int *err)
 			break;
 		}
 	}
-out:
 	*p = '\0';
 	return i;
 }
