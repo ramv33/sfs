@@ -99,7 +99,7 @@ int http_read_req(SSL *ssl, char *method, size_t method_size,
 	return 1;
 }
 
-void send_404(SSL *ssl, const char *filename)
+void send_404(SSL *ssl)
 {
 	const char *response = "<html>\n"
 				"<body>\n"
@@ -156,7 +156,7 @@ static void send_file_stats(SSL *ssl, int fd, const char *filename)
 	struct stat sb;
 
 	if (fstat(fd, &sb) == -1) {
-		send_404(ssl, filename);
+		send_404(ssl);
 		return;
 	}
 	get_filetype(filename, filetype, sizeof(filetype));
@@ -182,7 +182,7 @@ static void send_file(SSL *ssl, const char *filename)
 
 	fd = open(filename, O_RDONLY);
 	if (fd == -1) {
-		send_404(ssl, filename);
+		send_404(ssl);
 		return;
 	}
 
@@ -235,13 +235,13 @@ void serve_file(SSL *ssl, char *uri)
 
 	rm_trailing_slash(uri);
 	if (get_filename(filename, sizeof(filename), uri) == -1) {
-		send_404(ssl, filename);
+		send_404(ssl);
 		return;
 	}
 	PDEBUG("%s: file='%s'\n", __func__, filename);
 	if ((ret = is_dir(filename))) {
 		if (ret == -1) {
-			send_404(ssl, filename);
+			send_404(ssl);
 			return;
 		}
 		char *html = mkhtml(filename, uri);
